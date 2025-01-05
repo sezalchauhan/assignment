@@ -1,101 +1,176 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+1. Install Necessary Dependencies
+Node.js Setup
+Install nvm (Node Version Manager):
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+Install Node.js 22:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+nvm install 22
+Verify the installation:
 
-## Description
+node -v  # Should print v22.12.0
+nvm current  # Should print v22.12.0
+npm -v  # Should print 10.9.0
+PostgreSQL Setup
+Install pg (PostgreSQL client):
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+npm install pg
+Install TypeORM and NestJS TypeORM Integration:
 
-## Project setup
+npm install --save @nestjs/typeorm typeorm pg
+Verify PostgreSQL connection by listing the databases:
 
-```bash
-$ npm install
-```
+\dt
+To check which process is using port 3000:
 
-## Compile and run the project
+sudo lsof -i :3000
+2. Project Structure
+The project follows a typical NestJS structure:
 
-```bash
-# development
-$ npm run start
+src/
+ ├── colleges/
+ │    ├── colleges.controller.ts      # Controller for handling routes related to colleges
+ │    ├── colleges.service.ts         # Service for the business logic
+ │    ├── college_placement.entity.ts # Entity for college placement data
+ │    ├── college_wise_course.entity.ts # Entity for college courses
+ │    ├── colleges.entity.ts          # Entity for colleges
+ │    └── colleges.module.ts          # Module to integrate colleges components
+ ├── main.ts                          # The entry point of the application
+ └── app.module.ts                    # The main app module
+3. Setting Up PostgreSQL Database
+The following SQL schema will create the necessary tables for the College Management System:
+    user: "college_management_4bt4_user", // Replace with your PostgreSQL username
+    host: "dpg-ctt1k78gph6c738f6bq0-a.oregon-postgres.render.com",
+    database: "college_management_axku", // Default database
+    // database: "postgres", // Default database
+    password: "Ym97YVr0Hf9AjwdsZPFu1q0kh3snfWTg", // Replace with your password
+    port: 5432, // Default PostgreSQL port
 
-# watch mode
-$ npm run start:dev
+-- Create tables for States, Cities, Colleges, Placements, and Courses
 
-# production mode
-$ npm run start:prod
-```
+CREATE TABLE States (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
 
-## Run tests
+CREATE TABLE Cities (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
 
-```bash
-# unit tests
-$ npm run test
+CREATE TABLE Colleges (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  score INTEGER CHECK (score BETWEEN 1 AND 1000),
+  city_id INTEGER REFERENCES Cities(id),
+  state_id INTEGER REFERENCES States(id)
+);
 
-# e2e tests
-$ npm run test:e2e
+CREATE TABLE College_Placement (
+  id SERIAL PRIMARY KEY,
+  college_id INTEGER REFERENCES Colleges(id),
+  year INTEGER NOT NULL,
+  highest_placement DECIMAL(10, 2),
+  average_placement DECIMAL(10, 2),
+  median_placement DECIMAL(10, 2),
+  placement_rate DECIMAL(5, 2)
+);
 
-# test coverage
-$ npm run test:cov
-```
+CREATE TABLE College_Wise_Course (
+  id SERIAL PRIMARY KEY,
+  college_id INTEGER REFERENCES Colleges(id),
+  course_name VARCHAR(255) NOT NULL,
+  course_duration INTEGER NOT NULL,
+  course_fee DECIMAL(10, 2)
+);
+4. API Endpoints
+This API provides the following key endpoints:
 
-## Deployment
+1. Get College Data by ID
+Endpoint: GET /college_data/:college_id
+Description: Retrieves placement data for a specific college.
+Response: An array of placement data, including trends.
+Example request:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+GET /college_data/1
+2. Get Colleges by City or State
+Endpoint: GET /colleges?city=<city_name>&state=<state_name>
+Description: Retrieves colleges filtered by city and/or state.
+Response: A list of colleges matching the filters.
+Example request:
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+GET /colleges?city=New York&state=NY
+3. Get Courses by College ID
+Endpoint: GET /college_courses/:college_id
+Description: Retrieves all courses for a specific college, ordered by course fee.
+Response: A list of courses, including name, duration, and fee.
+Example request:
 
-## Resources
+GET /college_courses/1
+5. Running the Application
+Install all dependencies:
 
-Check out a few resources that may come in handy when working with NestJS:
+npm install
+Start the server:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+npm run start
+By default, the server will run on http://localhost:3000.
 
-## Support
+6. Testing
+Install Required Testing Dependencies
+To run tests, you'll need to install Jest and Supertest:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+npm install --save-dev jest supertest @nestjs/testing
+Create Test File
+Create a test file in the test/ directory, e.g., app.e2e-spec.ts, with the following content:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
 
-## License
+describe('AppController (e2e)', () => {
+  let app: INestApplication;
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-# college-management
-"# assignment" 
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('/ (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
+  });
+});
+Configure Jest
+Ensure that Jest is configured for E2E tests in the jest-e2e.json file:
+
+{
+  "preset": "@nestjs/testing",
+  "testEnvironment": "node",
+  "testMatch": [
+    "**/*.e2e-spec.ts"
+  ]
+}
+Run the Test
+Execute the test using the following command:
+
+npm run test:e2e
+This will start the server, perform the test, and verify the root endpoint (/) for a 200 OK response and the message Hello World!.
+
+7. Conclusion
+This College Management System provides APIs for:
+
+Retrieving detailed college data (including placements)
+Filtering colleges by city and state
+Fetching courses offered by a specific college
+The backend is built using NestJS, and it integrates with PostgreSQL via TypeORM. The project is extendable, allowing you to add more features such as updating/deleting records or adding user authentication.

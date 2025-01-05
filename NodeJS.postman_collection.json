@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "b7d84fda-2aec-4eb3-91c1-651dd8024a87",
+		"name": "NodeJS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34761964"
+	},
+	"item": [
+		{
+			"name": "College Course",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Colleges",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "College data",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

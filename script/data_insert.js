@@ -7,7 +7,7 @@ const { Client } = require('pg');
 
 const insertData = async () => {
   const dbClient = new Client({
-    user: 'piyush.chauhan', // Replace with your PostgreSQL username
+    user: 'sezal.chauhan', // Replace with your PostgreSQL username
     host: 'localhost', // PostgreSQL server
     database: 'college_management', // Default database
     password: '', // Replace with your password

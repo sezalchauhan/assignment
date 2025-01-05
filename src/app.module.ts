@@ -6,7 +6,7 @@ import { CollegesModule } from './colleges/colleges.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: 'postgresql://college_management_4bt4_user:Ym97YVr0Hf9AjwdsZPFu1q0kh3snfWTg@dpg-ctso5lrqf0us73duv4b0-a/college_management_4bt4',
+      url: 'postgresql://college_management_axku_user:kGcHh4VvQeo2AcpNF1uPdVirKVLHyNxl@dpg-ctt1k78gph6c738f6bq0-a/college_management_axku',
       synchronize: true,  // Set to false in production
       logging: true,      // Enable logging if needed
       ssl: {
